@@ -26,7 +26,7 @@ Open-source mobile app hardening for iOS: modular RASP detectors, signal aggrega
 ```swift
 // Package.swift
 dependencies: [
-    .package(path: "../mobshield-ios")
+    .package(path: "https://github.com/inforaamitsolutions/MobShield-iOS")
 ]
 ```
 
