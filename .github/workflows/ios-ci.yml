@@ -1,0 +1,34 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SwiftLint
+        run: |
+          brew install swiftlint
+          swiftlint lint --strict
+
+      - name: Resolve package
+        run: swift package resolve
+
+      - name: Build (iOS Simulator)
+        run: |
+          xcodebuild build \
+            -scheme MobShield-Package \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
+            -skipPackagePluginValidation
+
+      - name: Test (iOS Simulator)
+        run: |
+          xcodebuild test \
+            -scheme MobShield-Package \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
+            -skipPackagePluginValidation

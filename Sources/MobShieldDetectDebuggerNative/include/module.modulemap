@@ -1,0 +1,4 @@
+module MobShieldDetectDebuggerNative {
+    header "mobshield_debug_checks.h"
+    export *
+}

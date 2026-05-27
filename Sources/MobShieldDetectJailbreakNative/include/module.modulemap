@@ -1,0 +1,4 @@
+module MobShieldDetectJailbreakNative {
+    header "mobshield_jb_checks.h"
+    export *
+}

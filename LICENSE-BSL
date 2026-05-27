@@ -1,0 +1,37 @@
+Business Source License 1.1
+
+Parameters
+
+Licensor:             MobShield Contributors
+Licensed Work:        MobShield Native Core (C/C++ sources in mobshield-core and MobShieldCore native/)
+                      The Licensed Work is (c) 2025 MobShield Contributors
+Additional Use Grant: You may use the Licensed Work in production mobile applications
+                      that integrate MobShield according to the public documentation.
+Change Date:          2028-05-25
+Change License:       Apache License, Version 2.0
+
+For information about alternative licensing, contact the maintainers.
+
+Terms
+
+The Licensor hereby grants you the right to copy, modify, create derivative
+works, redistribute, and make non-production use of the Licensed Work. The
+Licensor may make an Additional Use Grant, above, permitting limited production use.
+
+From the Change Date, or the four year anniversary of the first publicly
+available distribution of a specific version of the Licensed Work under this
+License, whichever comes first, the Licensor hereby grants you rights under
+the terms of the Change License, and the rights granted in the paragraph
+above terminate.
+
+If your use of the Licensed Work does not comply with the requirements
+currently in effect as described in this License, you must purchase a
+commercial license from the Licensor, its affiliated entities, or authorized
+resellers, or you must refrain from using the Licensed Work.
+
+All copies of the original and modified Licensed Work, and derivative works
+of the Licensed Work, are subject to this License. This License is explicitly
+not intended to limit any rights you have under applicable copyright doctrines
+of fair use, fair dealing, or other equivalents.
+
+THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.

@@ -1,0 +1,4 @@
+module MobShieldDetectHooksNative {
+    header "mobshield_hook_checks.h"
+    export *
+}

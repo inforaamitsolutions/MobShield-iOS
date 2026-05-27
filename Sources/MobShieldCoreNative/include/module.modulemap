@@ -1,0 +1,4 @@
+module MobShieldCoreNative {
+    header "mobshield_native.h"
+    export *
+}
