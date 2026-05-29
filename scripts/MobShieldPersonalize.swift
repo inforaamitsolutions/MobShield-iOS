@@ -128,7 +128,7 @@ func generateHeader(config: Config, seed: Data) throws -> String {
     lines.append("#ifndef MOBSHIELD_BUILDINFO_H")
     lines.append("#define MOBSHIELD_BUILDINFO_H")
     lines.append("")
-    lines.append("#define MOBSHIELD_VERSION \"0.1.0\"")
+    lines.append("#define MOBSHIELD_VERSION \"1.0.0\"")
     lines.append("#define MOBSHIELD_BUILD_ID \"ios-\(config.expectedBundleId)-\(entropy.hexString().prefix(8))\"")
     lines.append("#define MOBSHIELD_SELF_CHECK_MAGIC 0x4D534844u")
     lines.append("#define MOBSHIELD_BUILD_ENTROPY \"\(entropy.hexString())\"")

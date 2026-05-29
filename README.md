@@ -39,7 +39,7 @@ dependencies: [
 ## CocoaPods
 
 ```ruby
-pod 'MobShield/All', '0.1.0'
+pod 'MobShield/All', '1.0.0'
 ```
 
 Add `scripts/mobshield-personalize.sh` as a Run Script build phase (see `MobShieldSampleApp`).
