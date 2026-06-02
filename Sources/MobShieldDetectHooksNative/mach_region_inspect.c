@@ -71,7 +71,7 @@ int mobshield_hook_mach_region_inspect(char* evidence, int evidence_len) {
                 return MOBSHIELD_HOOK_DETECTED;
             }
             address += size;
-            depth = 0;
+            // depth = 0;
         }
     }
     return MOBSHIELD_HOOK_OK;

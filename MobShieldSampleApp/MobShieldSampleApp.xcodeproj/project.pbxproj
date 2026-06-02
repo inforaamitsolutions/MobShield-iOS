@@ -3,11 +3,16 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		A10000010000000000000001 /* MobShieldSampleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000001 /* MobShieldSampleAppApp.swift */; };
+		A10000010000000000000003 /* MobShieldCore in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000001 /* MobShieldCore */; };
+		A10000010000000000000004 /* MobShieldDetectJailbreak in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000002 /* MobShieldDetectJailbreak */; };
+		A10000010000000000000005 /* MobShieldDetectHooks in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000003 /* MobShieldDetectHooks */; };
+		A10000010000000000000006 /* MobShieldDetectDebugger in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000004 /* MobShieldDetectDebugger */; };
+		A10000010000000000000007 /* MobShieldDetectIntegrity in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000005 /* MobShieldDetectIntegrity */; };
 		A10000010000000000000010 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000010 /* MainTabView.swift */; };
 		A10000010000000000000011 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000011 /* HomeView.swift */; };
 		A10000010000000000000012 /* ConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000012 /* ConfigView.swift */; };
@@ -17,11 +22,6 @@
 		A10000010000000000000016 /* SampleMobShieldController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000016 /* SampleMobShieldController.swift */; };
 		A10000010000000000000017 /* MobShieldOsLogListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000017 /* MobShieldOsLogListener.swift */; };
 		A10000010000000000000018 /* MasvsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000018 /* MasvsCatalog.swift */; };
-		A10000010000000000000003 /* MobShieldCore in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000001 /* MobShieldCore */; };
-		A10000010000000000000004 /* MobShieldDetectJailbreak in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000002 /* MobShieldDetectJailbreak */; };
-		A10000010000000000000005 /* MobShieldDetectHooks in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000003 /* MobShieldDetectHooks */; };
-		A10000010000000000000006 /* MobShieldDetectDebugger in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000004 /* MobShieldDetectDebugger */; };
-		A10000010000000000000007 /* MobShieldDetectIntegrity in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000005 /* MobShieldDetectIntegrity */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -135,7 +135,7 @@
 			);
 			mainGroup = A10000060000000000000001;
 			packageReferences = (
-				A100000B0000000000000001 /* XCLocalSwiftPackageReference "../" */,
+				A100000B0000000000000001 /* XCLocalSwiftPackageReference ".." */,
 			);
 			productRefGroup = A10000060000000000000003 /* Products */;
 			projectDirPath = "";
@@ -247,9 +247,12 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = MFPDYWP67B;
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = "$(inherited) $(DERIVED_FILE_DIR)";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(DERIVED_FILE_DIR)",
+				);
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -273,9 +276,12 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = MFPDYWP67B;
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = "$(inherited) $(DERIVED_FILE_DIR)";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(DERIVED_FILE_DIR)",
+				);
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -318,7 +324,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		A100000B0000000000000001 /* XCLocalSwiftPackageReference "../" */ = {
+		A100000B0000000000000001 /* XCLocalSwiftPackageReference ".." */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ..;
 		};
@@ -327,27 +333,27 @@
 /* Begin XCSwiftPackageProductDependency section */
 		A10000040000000000000001 /* MobShieldCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference "../" */;
+			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference ".." */;
 			productName = MobShieldCore;
 		};
 		A10000040000000000000002 /* MobShieldDetectJailbreak */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference "../" */;
+			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference ".." */;
 			productName = MobShieldDetectJailbreak;
 		};
 		A10000040000000000000003 /* MobShieldDetectHooks */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference "../" */;
+			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference ".." */;
 			productName = MobShieldDetectHooks;
 		};
 		A10000040000000000000004 /* MobShieldDetectDebugger */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference "../" */;
+			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference ".." */;
 			productName = MobShieldDetectDebugger;
 		};
 		A10000040000000000000005 /* MobShieldDetectIntegrity */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference "../" */;
+			package = A100000B0000000000000001 /* XCLocalSwiftPackageReference ".." */;
 			productName = MobShieldDetectIntegrity;
 		};
 /* End XCSwiftPackageProductDependency section */
