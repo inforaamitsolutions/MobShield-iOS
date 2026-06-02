@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E27221D2FCEEE3900F1DFD3 /* frida-gadget.config in Resources */ = {isa = PBXBuildFile; fileRef = 0E27221A2FCEEA6E00F1DFD3 /* frida-gadget.config */; };
 		A10000010000000000000001 /* MobShieldSampleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000001 /* MobShieldSampleAppApp.swift */; };
 		A10000010000000000000003 /* MobShieldCore in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000001 /* MobShieldCore */; };
 		A10000010000000000000004 /* MobShieldDetectJailbreak in Frameworks */ = {isa = PBXBuildFile; productRef = A10000040000000000000002 /* MobShieldDetectJailbreak */; };
@@ -24,7 +25,22 @@
 		A10000010000000000000018 /* MasvsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000018 /* MasvsCatalog.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		0E2722202FCEEF6100F1DFD3 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		0E2722122FCEE7A600F1DFD3 /* FridaGadget.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = FridaGadget.dylib; sourceTree = "<group>"; };
+		0E27221A2FCEEA6E00F1DFD3 /* frida-gadget.config */ = {isa = PBXFileReference; lastKnownFileType = text; path = "frida-gadget.config"; sourceTree = "<group>"; };
 		A10000020000000000000001 /* MobShieldSampleAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobShieldSampleAppApp.swift; sourceTree = "<group>"; };
 		A10000020000000000000010 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		A10000020000000000000011 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -65,8 +81,10 @@
 		A10000060000000000000002 /* MobShieldSampleApp */ = {
 			isa = PBXGroup;
 			children = (
+				0E27221A2FCEEA6E00F1DFD3 /* frida-gadget.config */,
 				A10000020000000000000001 /* MobShieldSampleAppApp.swift */,
 				A10000020000000000000010 /* MainTabView.swift */,
+				0E2722122FCEE7A600F1DFD3 /* FridaGadget.dylib */,
 				A10000020000000000000011 /* HomeView.swift */,
 				A10000020000000000000012 /* ConfigView.swift */,
 				A10000020000000000000013 /* DiagnosticsView.swift */,
@@ -98,6 +116,8 @@
 				A10000050000000000000002 /* Sources */,
 				A10000050000000000000001 /* Frameworks */,
 				A10000090000000000000002 /* MobShield Verify */,
+				0E27221B2FCEEA9400F1DFD3 /* Resources */,
+				0E2722202FCEEF6100F1DFD3 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -145,6 +165,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0E27221B2FCEEA9400F1DFD3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E27221D2FCEEE3900F1DFD3 /* frida-gadget.config in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		A10000090000000000000001 /* MobShield Personalize */ = {
@@ -260,6 +291,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/MobShieldSampleApp",
+				);
 				MARKETING_VERSION = 1.0.1;
 				MOBSHIELD_AGGRESSIVE_ANTI_DEBUG = NO;
 				MOBSHIELD_EXPECTED_BUNDLE_ID = io.mobshield.sample;
@@ -288,6 +323,10 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/MobShieldSampleApp",
 				);
 				MARKETING_VERSION = 1.0.1;
 				MOBSHIELD_AGGRESSIVE_ANTI_DEBUG = NO;
