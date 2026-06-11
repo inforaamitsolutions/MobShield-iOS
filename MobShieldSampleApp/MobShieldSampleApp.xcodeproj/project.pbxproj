@@ -295,7 +295,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MobShieldSampleApp",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MOBSHIELD_AGGRESSIVE_ANTI_DEBUG = NO;
 				MOBSHIELD_EXPECTED_BUNDLE_ID = io.mobshield.sample;
 				PRODUCT_BUNDLE_IDENTIFIER = io.mobshield.sample;
@@ -328,7 +328,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MobShieldSampleApp",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MOBSHIELD_AGGRESSIVE_ANTI_DEBUG = NO;
 				MOBSHIELD_EXPECTED_BUNDLE_ID = io.mobshield.sample;
 				PRODUCT_BUNDLE_IDENTIFIER = io.mobshield.sample;

@@ -26,7 +26,7 @@ Open-source mobile app hardening for iOS: modular RASP detectors, signal aggrega
 ```swift
 // Package.swift
 dependencies: [
-    .package(path: "https://github.com/inforaamitsolutions/MobShield-iOS")
+    .package(url: "https://github.com/inforaamitsolutions/MobShield-iOS", from: "1.0.2"),
 ]
 ```
 
@@ -39,7 +39,7 @@ dependencies: [
 ## CocoaPods
 
 ```ruby
-pod 'MobShield/All', '1.0.1'
+pod 'MobShield/All', '1.0.2'
 ```
 
 Add `scripts/mobshield-personalize.sh` as a Run Script build phase (see `MobShieldSampleApp`).
@@ -58,7 +58,7 @@ swift test
 
 ## Release
 
-Tag `v*.*.*` builds XCFramework zips, uploads them to GitHub Releases, and runs `pod trunk push` when `COCOAPODS_TRUNK_TOKEN` is set.
+Tag `*.*.*` (e.g. `1.0.2`) on this repo for SwiftPM; optionally build XCFramework zips for GitHub Releases and run `pod trunk push` for CocoaPods.
 
 ```bash
 ./scripts/build-xcframeworks.sh
