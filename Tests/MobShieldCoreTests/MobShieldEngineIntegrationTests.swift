@@ -38,14 +38,58 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
         engine.start()
         try? await Task.sleep(nanoseconds: 200_000_000)
 
-        XCTAssertEqual(1, listener.threats.count)
-        XCTAssertEqual(.privilegedAccess, listener.threats[0].type)
-        XCTAssertEqual(1, listener.finished.count)
+        XCTAssertEqual(1, listener.threatCount)
+        XCTAssertEqual(.privilegedAccess, listener.firstThreatType)
+        XCTAssertEqual(1, listener.finishedCount)
         XCTAssertTrue(engine.getState().running)
         XCTAssertTrue(engine.getState().activeThreats.contains(.privilegedAccess))
         XCTAssertEqual(1, engine.getLastEvents().count)
 
         engine.stop()
+    }
+
+    func testEngine_withoutInterval_runsSingleWave() async {
+        await ModuleRegistry.shared.register(MockDetectionModule())
+        let listener = RecordingListener()
+        let engine = MobShieldEngine(
+            config: MobShieldConfig(),
+            listener: listener,
+            resolveModules: {
+                await ModuleRegistry.shared.getAll()
+            },
+            signalSetVersion: MobShield.signalSetVersion
+        )
+
+        engine.start()
+        try? await Task.sleep(nanoseconds: 250_000_000)
+
+        XCTAssertEqual(1, listener.finishedCount)
+        engine.stop()
+    }
+
+    func testEngine_periodicInterval_rescansUntilStopped() async {
+        await ModuleRegistry.shared.register(MockDetectionModule())
+        let listener = RecordingListener()
+        let engine = MobShieldEngine(
+            config: MobShieldConfig(),
+            listener: listener,
+            resolveModules: {
+                await ModuleRegistry.shared.getAll()
+            },
+            signalSetVersion: MobShield.signalSetVersion,
+            periodicIntervalOverrideNanos: 30_000_000
+        )
+
+        engine.start()
+        try? await Task.sleep(nanoseconds: 250_000_000)
+        engine.stop()
+
+        let wavesAtStop = listener.finishedCount
+        XCTAssertGreaterThanOrEqual(wavesAtStop, 2, "periodic interval should trigger repeated scan waves")
+
+        // No further waves should fire once stopped.
+        try? await Task.sleep(nanoseconds: 150_000_000)
+        XCTAssertEqual(wavesAtStop, listener.finishedCount, "stop() must halt the periodic loop")
     }
 
     private struct MockDetectionModule: DetectionModule {
@@ -63,15 +107,33 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
         }
     }
 
-    private final class RecordingListener: MobShieldListener {
-        var threats: [ThreatEvent] = []
-        var finished: [[ThreatEvent]] = []
+    private final class RecordingListener: MobShieldListener, @unchecked Sendable {
+        private let lock = NSLock()
+        private var threats: [ThreatEvent] = []
+        private var finished: [[ThreatEvent]] = []
+
+        var threatCount: Int {
+            lock.lock(); defer { lock.unlock() }
+            return threats.count
+        }
+
+        var firstThreatType: ThreatType? {
+            lock.lock(); defer { lock.unlock() }
+            return threats.first?.type
+        }
+
+        var finishedCount: Int {
+            lock.lock(); defer { lock.unlock() }
+            return finished.count
+        }
 
         func onThreat(_ event: ThreatEvent) {
+            lock.lock(); defer { lock.unlock() }
             threats.append(event)
         }
 
         func onAllChecksFinished(_ events: [ThreatEvent]) {
+            lock.lock(); defer { lock.unlock() }
             finished.append(events)
         }
     }

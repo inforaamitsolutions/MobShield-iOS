@@ -21,6 +21,8 @@ final class MobShieldEngine: @unchecked Sendable {
     private weak var listener: MobShieldListener?
     private let resolveModules: @Sendable () async -> [any DetectionModule]
     private let signalSetVersion: String
+    /// Rescan cadence in nanoseconds; nil runs a single scan wave (spec default).
+    private let periodicIntervalNanos: UInt64?
 
     private let stateLock = NSLock()
     private var state: MobShieldState
@@ -31,19 +33,38 @@ final class MobShieldEngine: @unchecked Sendable {
         config: MobShieldConfig,
         listener: MobShieldListener,
         resolveModules: @escaping @Sendable () async -> [any DetectionModule],
-        signalSetVersion: String
+        signalSetVersion: String,
+        periodicIntervalOverrideNanos: UInt64? = nil
     ) {
         self.config = config
         self.listener = listener
         self.resolveModules = resolveModules
         self.signalSetVersion = signalSetVersion
+        self.periodicIntervalNanos = periodicIntervalOverrideNanos
+            ?? config.periodicIntervalSec.map { UInt64($0) * 1_000_000_000 }
         self.state = MobShieldEngine.idleState(signalSetVersion: signalSetVersion)
     }
 
     func start() {
         scanTask?.cancel()
         scanTask = Task { [weak self] in
-            await self?.runScanWave()
+            await self?.runScanLoop()
+        }
+    }
+
+    /// Runs one scan wave, then repeats every `periodicIntervalNanos` until cancelled.
+    /// When no interval is configured, runs exactly one wave (single-shot).
+    private func runScanLoop() async {
+        while !Task.isCancelled {
+            await runScanWave()
+            guard let periodicIntervalNanos else {
+                return
+            }
+            do {
+                try await Task.sleep(nanoseconds: periodicIntervalNanos)
+            } catch {
+                return
+            }
         }
     }
 
