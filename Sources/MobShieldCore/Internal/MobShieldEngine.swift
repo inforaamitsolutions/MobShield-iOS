@@ -23,6 +23,8 @@ final class MobShieldEngine: @unchecked Sendable {
     private let signalSetVersion: String
     /// Rescan cadence in nanoseconds; nil runs a single scan wave (spec default).
     private let periodicIntervalNanos: UInt64?
+    /// Process-exit action invoked when the termination policy is satisfied. Injectable for tests.
+    private let terminate: @Sendable () -> Void
 
     private let stateLock = NSLock()
     private var state: MobShieldState
@@ -34,7 +36,8 @@ final class MobShieldEngine: @unchecked Sendable {
         listener: MobShieldListener,
         resolveModules: @escaping @Sendable () async -> [any DetectionModule],
         signalSetVersion: String,
-        periodicIntervalOverrideNanos: UInt64? = nil
+        periodicIntervalOverrideNanos: UInt64? = nil,
+        terminate: @escaping @Sendable () -> Void = MobShieldEngine.defaultTerminate
     ) {
         self.config = config
         self.listener = listener
@@ -42,6 +45,7 @@ final class MobShieldEngine: @unchecked Sendable {
         self.signalSetVersion = signalSetVersion
         self.periodicIntervalNanos = periodicIntervalOverrideNanos
             ?? config.periodicIntervalSec.map { UInt64($0) * 1_000_000_000 }
+        self.terminate = terminate
         self.state = MobShieldEngine.idleState(signalSetVersion: signalSetVersion)
     }
 
@@ -54,9 +58,18 @@ final class MobShieldEngine: @unchecked Sendable {
 
     /// Runs one scan wave, then repeats every `periodicIntervalNanos` until cancelled.
     /// When no interval is configured, runs exactly one wave (single-shot).
+    /// Terminates the process (and ends the loop) once the configured policy is satisfied.
     private func runScanLoop() async {
         while !Task.isCancelled {
-            await runScanWave()
+            let events = await runScanWave()
+            if MobShieldEngine.shouldTerminate(
+                events: events,
+                detectOnly: config.detectOnly,
+                policy: config.terminationPolicy
+            ) {
+                terminate()
+                return
+            }
             guard let periodicIntervalNanos else {
                 return
             }
@@ -66,6 +79,34 @@ final class MobShieldEngine: @unchecked Sendable {
                 return
             }
         }
+    }
+
+    /// Decides whether the current scan results warrant process termination.
+    ///
+    /// - `.none` (and any `detectOnly` config): never terminates.
+    /// - `.exitOnBypass`: terminates when any threat reaches `.high` or above — a confirmed
+    ///   compromise of the protected environment.
+    /// - `.exitOnCritical`: terminates only when a threat reaches `.critical`.
+    static func shouldTerminate(
+        events: [ThreatEvent],
+        detectOnly: Bool,
+        policy: TerminationPolicy
+    ) -> Bool {
+        guard !detectOnly else {
+            return false
+        }
+        switch policy {
+        case .none:
+            return false
+        case .exitOnBypass:
+            return events.contains { severityRank($0.severity) >= severityRank(.high) }
+        case .exitOnCritical:
+            return events.contains { $0.severity == .critical }
+        }
+    }
+
+    static let defaultTerminate: @Sendable () -> Void = {
+        exit(EXIT_FAILURE)
     }
 
     func stop() {
@@ -89,13 +130,14 @@ final class MobShieldEngine: @unchecked Sendable {
         return lastEvents
     }
 
-    private func runScanWave() async {
+    @discardableResult
+    private func runScanWave() async -> [ThreatEvent] {
         let modules = await resolveModules()
         if modules.isEmpty {
             let empty: [ThreatEvent] = []
             listener?.onAllChecksFinished(empty)
             updateState(events: empty, running: true)
-            return
+            return empty
         }
 
         let signals = await withTaskGroup(of: [Signal].self) { group in
@@ -118,6 +160,7 @@ final class MobShieldEngine: @unchecked Sendable {
         }
         listener?.onAllChecksFinished(events)
         updateState(events: events, running: true)
+        return events
     }
 
     private func updateState(events: [ThreatEvent], running: Bool) {

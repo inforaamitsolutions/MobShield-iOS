@@ -92,16 +92,117 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
         XCTAssertEqual(wavesAtStop, listener.finishedCount, "stop() must halt the periodic loop")
     }
 
+    // MARK: - Termination policy
+
+    func testShouldTerminate_matrix() {
+        let critical = [event(.critical)]
+        let high = [event(.high)]
+        let medium = [event(.medium)]
+
+        // .none never terminates.
+        XCTAssertFalse(MobShieldEngine.shouldTerminate(events: critical, detectOnly: false, policy: .none))
+
+        // detectOnly overrides any policy (defense-in-depth alongside config validation).
+        XCTAssertFalse(MobShieldEngine.shouldTerminate(events: critical, detectOnly: true, policy: .exitOnCritical))
+
+        // .exitOnCritical fires only at critical.
+        XCTAssertTrue(MobShieldEngine.shouldTerminate(events: critical, detectOnly: false, policy: .exitOnCritical))
+        XCTAssertFalse(MobShieldEngine.shouldTerminate(events: high, detectOnly: false, policy: .exitOnCritical))
+
+        // .exitOnBypass fires at high or above.
+        XCTAssertTrue(MobShieldEngine.shouldTerminate(events: high, detectOnly: false, policy: .exitOnBypass))
+        XCTAssertTrue(MobShieldEngine.shouldTerminate(events: critical, detectOnly: false, policy: .exitOnBypass))
+        XCTAssertFalse(MobShieldEngine.shouldTerminate(events: medium, detectOnly: false, policy: .exitOnBypass))
+
+        // No events → never terminate.
+        XCTAssertFalse(MobShieldEngine.shouldTerminate(events: [], detectOnly: false, policy: .exitOnBypass))
+    }
+
+    func testEngine_exitOnCritical_terminatesOnCriticalThreat() async {
+        await ModuleRegistry.shared.register(MockDetectionModule(weight: 90, confidence: 100))
+        let config = try! MobShieldConfig.make(detectOnly: false, terminationPolicy: .exitOnCritical)
+        let terminated = expectation(description: "terminate invoked")
+        let engine = makeEngine(config: config, terminate: { terminated.fulfill() })
+
+        engine.start()
+        await fulfillment(of: [terminated], timeout: 1.0)
+        engine.stop()
+    }
+
+    func testEngine_exitOnBypass_terminatesOnHighSeverity() async {
+        // weight 50 * confidence 100% → score 50 → HIGH for privilegedAccess (warning 40, critical 70).
+        await ModuleRegistry.shared.register(MockDetectionModule(weight: 50, confidence: 100))
+        let config = try! MobShieldConfig.make(detectOnly: false, terminationPolicy: .exitOnBypass)
+        let terminated = expectation(description: "terminate invoked")
+        let engine = makeEngine(config: config, terminate: { terminated.fulfill() })
+
+        engine.start()
+        await fulfillment(of: [terminated], timeout: 1.0)
+        engine.stop()
+    }
+
+    func testEngine_exitOnCritical_ignoresHighSeverity() async {
+        await ModuleRegistry.shared.register(MockDetectionModule(weight: 50, confidence: 100)) // HIGH only
+        let config = try! MobShieldConfig.make(detectOnly: false, terminationPolicy: .exitOnCritical)
+        let notTerminated = expectation(description: "terminate must not fire on HIGH")
+        notTerminated.isInverted = true
+        let engine = makeEngine(config: config, terminate: { notTerminated.fulfill() })
+
+        engine.start()
+        await fulfillment(of: [notTerminated], timeout: 0.3)
+        engine.stop()
+    }
+
+    func testEngine_detectOnlyDefault_neverTerminates() async {
+        await ModuleRegistry.shared.register(MockDetectionModule(weight: 90, confidence: 100)) // CRITICAL
+        let notTerminated = expectation(description: "detect-only must not terminate")
+        notTerminated.isInverted = true
+        let engine = makeEngine(config: MobShieldConfig(), terminate: { notTerminated.fulfill() })
+
+        engine.start()
+        await fulfillment(of: [notTerminated], timeout: 0.3)
+        engine.stop()
+    }
+
+    // MARK: - Helpers
+
+    private func makeEngine(
+        config: MobShieldConfig,
+        terminate: @escaping @Sendable () -> Void
+    ) -> MobShieldEngine {
+        MobShieldEngine(
+            config: config,
+            listener: RecordingListener(),
+            resolveModules: {
+                await ModuleRegistry.shared.getAll()
+            },
+            signalSetVersion: MobShield.signalSetVersion,
+            terminate: terminate
+        )
+    }
+
+    private func event(_ severity: Severity) -> ThreatEvent {
+        ThreatEvent.create(
+            type: .privilegedAccess,
+            severity: severity,
+            signals: ["mock"],
+            score: 50,
+            timestampMs: 0
+        )
+    }
+
     private struct MockDetectionModule: DetectionModule {
         let name = "mock-root"
         let criticality = 10
+        var weight = 90
+        var confidence = 100
 
         func scan() async -> [Signal] {
             [
                 Signal(
                     name: "android.root.mock",
-                    weight: 90,
-                    confidence: 100
+                    weight: weight,
+                    confidence: confidence
                 ),
             ]
         }
