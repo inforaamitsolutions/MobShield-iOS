@@ -25,6 +25,8 @@ final class MobShieldEngine: @unchecked Sendable {
     private let periodicIntervalNanos: UInt64?
     /// Process-exit action invoked when the termination policy is satisfied. Injectable for tests.
     private let terminate: @Sendable () -> Void
+    /// Native core integrity probe; a healthy core returns nonzero. Injectable for tests.
+    private let selfCheck: @Sendable () -> Int
 
     private let stateLock = NSLock()
     private var state: MobShieldState
@@ -37,7 +39,8 @@ final class MobShieldEngine: @unchecked Sendable {
         resolveModules: @escaping @Sendable () async -> [any DetectionModule],
         signalSetVersion: String,
         periodicIntervalOverrideNanos: UInt64? = nil,
-        terminate: @escaping @Sendable () -> Void = MobShieldEngine.defaultTerminate
+        terminate: @escaping @Sendable () -> Void = MobShieldEngine.defaultTerminate,
+        selfCheck: @escaping @Sendable () -> Int = MobShieldEngine.defaultSelfCheck
     ) {
         self.config = config
         self.listener = listener
@@ -46,6 +49,7 @@ final class MobShieldEngine: @unchecked Sendable {
         self.periodicIntervalNanos = periodicIntervalOverrideNanos
             ?? config.periodicIntervalSec.map { UInt64($0) * 1_000_000_000 }
         self.terminate = terminate
+        self.selfCheck = selfCheck
         self.state = MobShieldEngine.idleState(signalSetVersion: signalSetVersion)
     }
 
@@ -109,6 +113,28 @@ final class MobShieldEngine: @unchecked Sendable {
         exit(EXIT_FAILURE)
     }
 
+    static let defaultSelfCheck: @Sendable () -> Int = {
+        NativeBridge.selfCheck()
+    }
+
+    /// Signal name for the native core integrity probe; maps to `.appIntegrity`.
+    static let selfCheckSignalName = "ios.integrity.native_self_check"
+
+    /// Emits an integrity signal when the native core self-check reports an unhealthy (zero) result,
+    /// which indicates the native core was zeroed, swapped, or otherwise tampered with. Per the
+    /// documented native contract, a healthy core returns nonzero.
+    private func makeSelfCheckSignal() -> Signal? {
+        guard selfCheck() == 0 else {
+            return nil
+        }
+        return Signal(
+            name: MobShieldEngine.selfCheckSignalName,
+            weight: 90,
+            confidence: 95,
+            evidence: ["reason": "native_self_check_failed"]
+        )
+    }
+
     func stop() {
         scanTask?.cancel()
         scanTask = nil
@@ -133,14 +159,8 @@ final class MobShieldEngine: @unchecked Sendable {
     @discardableResult
     private func runScanWave() async -> [ThreatEvent] {
         let modules = await resolveModules()
-        if modules.isEmpty {
-            let empty: [ThreatEvent] = []
-            listener?.onAllChecksFinished(empty)
-            updateState(events: empty, running: true)
-            return empty
-        }
 
-        let signals = await withTaskGroup(of: [Signal].self) { group in
+        var signals = await withTaskGroup(of: [Signal].self) { group in
             for module in modules {
                 group.addTask {
                     await module.scan()
@@ -151,6 +171,11 @@ final class MobShieldEngine: @unchecked Sendable {
                 collected.append(contentsOf: result)
             }
             return collected
+        }
+
+        // Native core integrity runs every wave, independent of registered modules.
+        if let selfCheckSignal = makeSelfCheckSignal() {
+            signals.append(selfCheckSignal)
         }
 
         let aggregator = SignalAggregator(config: config)
