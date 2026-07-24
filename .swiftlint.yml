@@ -1,7 +1,21 @@
+excluded:
+  - .build
+
 disabled_rules:
+  # Trailing commas in multiline literals are an intentional project convention
+  # (smaller diffs when appending elements).
+  - trailing_comma
+  # Force-try is used deliberately for known-safe default configs and in tests.
+  - force_try
+  # Native bridges mirror C ABIs, so snake_case params (evidence_len, out_len)
+  # and long symbol names are expected.
+  - identifier_name
   - trailing_whitespace
+
 line_length:
-  warning: 120
+  warning: 160
   error: 160
-identifier_name:
-  min_length: 2
+
+function_body_length:
+  warning: 90
+  error: 120
