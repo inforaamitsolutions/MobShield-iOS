@@ -122,7 +122,7 @@ let package = Package(
             cSettings: [
                 .headerSearchPath("include"),
                 .unsafeFlags(["-Wall", "-Werror"]),
-            ],
+            ]
         ),
         .target(
             name: "MobShieldDetectDebugger",

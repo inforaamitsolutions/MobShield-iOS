@@ -32,7 +32,13 @@ final class MobShieldOsLogListener: MobShieldListener {
     }
 
     func onThreat(_ event: ThreatEvent) {
-        log.info("threat type=\(event.type.rawValue, privacy: .public) severity=\(event.severity.rawValue, privacy: .public) score=\(event.score, privacy: .public)")
+        log.info(
+            """
+            threat type=\(event.type.rawValue, privacy: .public) \
+            severity=\(event.severity.rawValue, privacy: .public) \
+            score=\(event.score, privacy: .public)
+            """
+        )
         onThreatReceived(event)
     }
 

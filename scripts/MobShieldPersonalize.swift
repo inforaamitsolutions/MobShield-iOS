@@ -155,7 +155,7 @@ func generateHeader(config: Config, seed: Data) throws -> String {
 func symbolSuffix(seed: Data, index: Int) -> String {
     var payload = seed
     payload.append(UInt8(index))
-    payload.append("mobshield-symbol-v1".data(using: .utf8)!)
+    payload.append(Data("mobshield-symbol-v1".utf8))
     return Data(SHA256.hash(data: payload).prefix(4)).hexString()
 }
 
