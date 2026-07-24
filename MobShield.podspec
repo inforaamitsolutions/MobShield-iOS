@@ -16,7 +16,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'MobShield'
-  s.version          = '1.0.2'
+  s.version          = '1.0.3'
   s.summary          = 'MobShield iOS RASP library suite'
   s.description      = 'Runtime self-protection for iOS. See mobshield-spec/MOBSHIELD_SPEC.md.'
   s.homepage         = 'https://github.com/inforaamitsolutions/MobShield-iOS'
