@@ -112,7 +112,8 @@ when…" describes the runtime condition that produces the signal.
 
 - **Phase 1 (this doc + `MobShieldValidation` harness):** landed. Harness contract covered by
   `MobShieldValidationTests`; clean-environment behavior documented above.
-- **Phase 2:** on-device diagnostics screen in the sample app to run the harness and surface the
-  report for capture.
-- **Phase 3:** on-device runbook (palera1n/Dopamine + `frida-server`) and a results template to
-  record actual fired signals against the compromised-environment table.
+- **Phase 2 (sample-app Diagnostics screen):** landed. **Diagnostics → Run validation** runs the
+  harness on-device and produces a copyable report.
+- **Phase 3 (device runbook + results template):** landed — see
+  [`validation-device-runbook.md`](validation-device-runbook.md) for the step-by-step procedure to
+  validate against a jailbreak / `frida-server` / debugger and record actual fired signals.
