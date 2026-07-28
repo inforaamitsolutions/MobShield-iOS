@@ -32,3 +32,12 @@ jobs:
             -scheme MobShield-Package \
             -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
             -skipPackagePluginValidation
+
+      - name: Build sample app (iOS Simulator)
+        run: |
+          xcodebuild build \
+            -project MobShieldSampleApp/MobShieldSampleApp.xcodeproj \
+            -scheme MobShieldSampleApp \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM=""
