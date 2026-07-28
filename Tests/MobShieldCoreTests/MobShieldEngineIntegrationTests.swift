@@ -32,7 +32,8 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
             resolveModules: {
                 await ModuleRegistry.shared.getAll()
             },
-            signalSetVersion: MobShield.signalSetVersion
+            signalSetVersion: MobShield.signalSetVersion,
+            selfCheck: { 1 }
         )
 
         engine.start()
@@ -57,7 +58,8 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
             resolveModules: {
                 await ModuleRegistry.shared.getAll()
             },
-            signalSetVersion: MobShield.signalSetVersion
+            signalSetVersion: MobShield.signalSetVersion,
+            selfCheck: { 1 }
         )
 
         engine.start()
@@ -77,7 +79,8 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
                 await ModuleRegistry.shared.getAll()
             },
             signalSetVersion: MobShield.signalSetVersion,
-            periodicIntervalOverrideNanos: 30_000_000
+            periodicIntervalOverrideNanos: 30_000_000,
+            selfCheck: { 1 }
         )
 
         engine.start()
@@ -164,11 +167,76 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
         engine.stop()
     }
 
+    // MARK: - Native self-check integrity
+
+    func testEngine_nativeSelfCheckFailure_emitsCriticalIntegrityThreat() async {
+        // No modules registered: the self-check must run on its own.
+        let listener = RecordingListener()
+        let engine = MobShieldEngine(
+            config: MobShieldConfig(),
+            listener: listener,
+            resolveModules: {
+                await ModuleRegistry.shared.getAll()
+            },
+            signalSetVersion: MobShield.signalSetVersion,
+            selfCheck: { 0 } // unhealthy / tampered native core
+        )
+
+        engine.start()
+        try? await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertEqual(1, listener.threatCount)
+        XCTAssertEqual(.appIntegrity, listener.firstThreat?.type)
+        XCTAssertEqual(.critical, listener.firstThreat?.severity)
+        XCTAssertTrue(engine.getState().activeThreats.contains(.appIntegrity))
+        engine.stop()
+    }
+
+    func testEngine_healthySelfCheck_emitsNoIntegritySignal() async {
+        let listener = RecordingListener()
+        let engine = MobShieldEngine(
+            config: MobShieldConfig(),
+            listener: listener,
+            resolveModules: {
+                await ModuleRegistry.shared.getAll()
+            },
+            signalSetVersion: MobShield.signalSetVersion,
+            selfCheck: { 0x4D534844 } // healthy magic
+        )
+
+        engine.start()
+        try? await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertEqual(0, listener.threatCount)
+        XCTAssertEqual(1, listener.finishedCount)
+        engine.stop()
+    }
+
+    func testEngine_selfCheckFailure_withExitOnCritical_terminates() async {
+        let config = try! MobShieldConfig.make(detectOnly: false, terminationPolicy: .exitOnCritical)
+        let terminated = expectation(description: "terminate invoked on tampered core")
+        let engine = MobShieldEngine(
+            config: config,
+            listener: RecordingListener(),
+            resolveModules: {
+                await ModuleRegistry.shared.getAll()
+            },
+            signalSetVersion: MobShield.signalSetVersion,
+            terminate: { terminated.fulfill() },
+            selfCheck: { 0 }
+        )
+
+        engine.start()
+        await fulfillment(of: [terminated], timeout: 1.0)
+        engine.stop()
+    }
+
     // MARK: - Helpers
 
     private func makeEngine(
         config: MobShieldConfig,
-        terminate: @escaping @Sendable () -> Void
+        terminate: @escaping @Sendable () -> Void,
+        selfCheck: @escaping @Sendable () -> Int = { 1 }
     ) -> MobShieldEngine {
         MobShieldEngine(
             config: config,
@@ -177,7 +245,8 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
                 await ModuleRegistry.shared.getAll()
             },
             signalSetVersion: MobShield.signalSetVersion,
-            terminate: terminate
+            terminate: terminate,
+            selfCheck: selfCheck
         )
     }
 
@@ -221,6 +290,11 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
         var firstThreatType: ThreatType? {
             lock.lock(); defer { lock.unlock() }
             return threats.first?.type
+        }
+
+        var firstThreat: ThreatEvent? {
+            lock.lock(); defer { lock.unlock() }
+            return threats.first
         }
 
         var finishedCount: Int {
