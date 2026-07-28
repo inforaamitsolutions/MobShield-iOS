@@ -29,6 +29,10 @@ public final class MobShield: @unchecked Sendable {
 
     /// Starts MobShield: loads native core, schedules registered ``DetectionModule`` scans,
     /// and delivers callbacks on the listener.
+    ///
+    /// The `listener` is retained for the duration of the run and released on ``stop()`` (or when
+    /// ``start(config:listener:)`` is called again), so callers do not need to hold their own
+    /// reference to it to keep receiving callbacks.
     public func start(config: MobShieldConfig, listener: MobShieldListener) {
         NativeBridge.ensureLoaded()
         stop()

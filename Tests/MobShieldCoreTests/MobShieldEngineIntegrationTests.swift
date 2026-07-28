@@ -231,6 +231,40 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
         engine.stop()
     }
 
+    // MARK: - Listener retention
+
+    func testEngine_retainsListener_whenCallerDropsReference() async {
+        await ModuleRegistry.shared.register(MockDetectionModule(weight: 90, confidence: 100))
+
+        weak var weakListener: RecordingListener?
+        // Build the engine in a nested scope so the only strong reference to the listener
+        // is the one the engine holds. Under the old `weak` field this would deallocate
+        // immediately and callbacks would silently stop.
+        func buildEngine() -> MobShieldEngine {
+            let listener = RecordingListener()
+            weakListener = listener
+            return MobShieldEngine(
+                config: MobShieldConfig(),
+                listener: listener,
+                resolveModules: {
+                    await ModuleRegistry.shared.getAll()
+                },
+                signalSetVersion: MobShield.signalSetVersion,
+                selfCheck: { 1 }
+            )
+        }
+        let engine = buildEngine()
+
+        XCTAssertNotNil(weakListener, "engine must retain the listener strongly")
+
+        engine.start()
+        try? await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertNotNil(weakListener, "listener must stay alive while the engine runs")
+        XCTAssertEqual(1, weakListener?.finishedCount, "callbacks must still be delivered")
+        engine.stop()
+    }
+
     // MARK: - Helpers
 
     private func makeEngine(

@@ -19,3 +19,8 @@ line_length:
 function_body_length:
   warning: 90
   error: 120
+
+# Test suites accumulate many focused cases in one XCTestCase; the default 250 is too tight.
+type_body_length:
+  warning: 400
+  error: 400
