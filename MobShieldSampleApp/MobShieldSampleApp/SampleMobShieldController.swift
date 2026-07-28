@@ -93,6 +93,14 @@ enum SampleMobShieldController {
         await start(prefs: prefs, listener: listener)
     }
 
+    static func runValidation(prefs: SamplePreferences) async -> ValidationReport {
+        guard let config = try? buildConfig(prefs: prefs) else {
+            return ValidationReport(modules: [], events: [], generatedAtMs: 0)
+        }
+        await registerModules(config: config, prefs: prefs)
+        return await MobShieldValidation.runRegistered(config: config)
+    }
+
     static func collectSignals(prefs: SamplePreferences) async -> [Signal] {
         guard let config = try? buildConfig(prefs: prefs) else { return [] }
         await registerModules(config: config, prefs: prefs)

@@ -23,6 +23,8 @@ final class SampleViewModel: ObservableObject {
     @Published private(set) var threats: [ThreatRow] = []
     @Published private(set) var signals: [SignalRow] = []
     @Published private(set) var diagnosticsLoading = false
+    @Published private(set) var validation: ValidationDisplay?
+    @Published private(set) var validationLoading = false
     @Published private(set) var posture = PostureSnapshot.idle
 
     let sdkVersion = MobShield.getVersion()
@@ -76,6 +78,19 @@ final class SampleViewModel: ObservableObject {
                 .sorted { ($0.weight * $0.confidence) > ($1.weight * $1.confidence) }
                 .map(SignalRow.init)
             diagnosticsLoading = false
+        }
+    }
+
+    func runValidation() {
+        validationLoading = true
+        Task {
+            let report = await SampleMobShieldController.runValidation(prefs: prefs)
+            validation = ValidationDisplay(
+                report: report,
+                sdkVersion: sdkVersion,
+                buildEntropyPreview: buildEntropyPreview
+            )
+            validationLoading = false
         }
     }
 
@@ -146,5 +161,81 @@ struct SignalRow: Identifiable {
         weight = signal.weight
         confidence = signal.confidence
         evidenceSummary = signal.evidence.map { "\($0.key)=\($0.value)" }.joined(separator: ", ")
+    }
+
+    init(validationSignal signal: ValidationSignal) {
+        id = signal.name
+        name = signal.name
+        weight = signal.weight
+        confidence = signal.confidence
+        evidenceSummary = signal.evidence.map { "\($0.key)=\($0.value)" }.joined(separator: ", ")
+    }
+}
+
+/// A display-friendly snapshot of a ``ValidationReport`` for the diagnostics screen, plus a
+/// plain-text `exportText` that can be copied off-device to record actual detections.
+struct ValidationDisplay {
+    struct Module: Identifiable {
+        let id: String
+        let name: String
+        let criticality: Int
+        let didFire: Bool
+        let signals: [SignalRow]
+    }
+
+    let modules: [Module]
+    let threats: [ThreatRow]
+    let highestSeverityLabel: String
+    let firedSignalCount: Int
+    let exportText: String
+
+    init(report: ValidationReport, sdkVersion: String, buildEntropyPreview: String) {
+        modules = report.modules.map { result in
+            Module(
+                id: result.moduleName,
+                name: result.moduleName,
+                criticality: result.criticality,
+                didFire: result.didFire,
+                signals: result.signals.map { SignalRow(validationSignal: $0) }
+            )
+        }
+        threats = report.events.map(ThreatRow.init)
+        highestSeverityLabel = report.highestSeverity?.rawValue ?? "NONE"
+        firedSignalCount = report.firedSignalNames.count
+        exportText = ValidationDisplay.makeExportText(
+            report: report,
+            sdkVersion: sdkVersion,
+            buildEntropyPreview: buildEntropyPreview
+        )
+    }
+
+    private static func makeExportText(
+        report: ValidationReport,
+        sdkVersion: String,
+        buildEntropyPreview: String
+    ) -> String {
+        var lines: [String] = []
+        lines.append("MobShield validation report")
+        lines.append("SDK \(sdkVersion) · build \(buildEntropyPreview) · t=\(report.generatedAtMs)ms")
+        lines.append("Highest severity: \(report.highestSeverity?.rawValue ?? "NONE")"
+            + " · signals fired: \(report.firedSignalNames.count)")
+        lines.append("")
+        lines.append("Modules:")
+        for module in report.modules {
+            let names = module.signals.map(\.name).joined(separator: ", ")
+            let status = module.didFire ? "FIRED [\(names)]" : "clean"
+            lines.append("- \(module.moduleName) (crit \(module.criticality)): \(status)")
+        }
+        lines.append("")
+        lines.append("Threats:")
+        if report.events.isEmpty {
+            lines.append("- none")
+        } else {
+            for event in report.events {
+                lines.append("- \(event.type.rawValue)  \(event.severity.rawValue)"
+                    + "  score \(event.score)  signals: \(event.signals.joined(separator: ", "))")
+            }
+        }
+        return lines.joined(separator: "\n")
     }
 }
