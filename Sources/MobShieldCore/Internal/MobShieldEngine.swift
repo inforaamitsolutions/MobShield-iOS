@@ -18,7 +18,10 @@ import Foundation
 
 final class MobShieldEngine: @unchecked Sendable {
     private let config: MobShieldConfig
-    private weak var listener: MobShieldListener?
+    // Retained strongly for the engine's lifetime so callbacks are delivered even when the
+    // caller does not separately hold the listener; released when the engine is torn down
+    // (stop()/restart). No retain cycle: the listener has no reference back to the engine.
+    private let listener: MobShieldListener
     private let resolveModules: @Sendable () async -> [any DetectionModule]
     private let signalSetVersion: String
     /// Rescan cadence in nanoseconds; nil runs a single scan wave (spec default).
@@ -181,9 +184,9 @@ final class MobShieldEngine: @unchecked Sendable {
         let aggregator = SignalAggregator(config: config)
         let events = aggregator.aggregate(signals: signals)
         for event in events {
-            listener?.onThreat(event)
+            listener.onThreat(event)
         }
-        listener?.onAllChecksFinished(events)
+        listener.onAllChecksFinished(events)
         updateState(events: events, running: true)
         return events
     }
