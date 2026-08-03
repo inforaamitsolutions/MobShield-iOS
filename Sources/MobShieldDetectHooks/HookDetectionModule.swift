@@ -56,6 +56,7 @@ public struct HookDetectionModule: DetectionModule {
             group.addTask { await self.runCheck(HookSignalDefaults.machRegion) { self.nativeChecker.machRegionInspect() } }
             group.addTask { await self.runCheck(HookSignalDefaults.prologue) { self.nativeChecker.functionPrologueInspect() } }
             group.addTask { await self.runCheck(HookSignalDefaults.fridaMaps) { self.nativeChecker.fridaArtifactScan() } }
+            group.addTask { await self.runCheck(HookSignalDefaults.fridaThread) { self.nativeChecker.fridaThreadScan() } }
             group.addTask { await self.runCheck(HookSignalDefaults.fridaPort) { self.nativeChecker.fridaPortProbe() } }
             group.addTask { await self.runCheck(HookSignalDefaults.dyldInsert) { self.nativeChecker.dyldEnvironmentScan() } }
             group.addTask { await self.runCheck(HookSignalDefaults.methodSwizzle) { self.nativeChecker.methodSwizzleDetect() } }
