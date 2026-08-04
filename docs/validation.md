@@ -55,6 +55,7 @@ when…" describes the runtime condition that produces the signal.
 | Signal | weight | conf | Signal fires when… |
 |---|---|---|---|
 | `common.hook.prologue` | 80 | 90 | a monitored function prologue is patched / trampolined |
+| `ios.hook.frida_thread` | 80 | 90 | a running thread is named like a Frida worker (`gum-js-loop`, `gmain`, `gdbus`, `pool-frida`) |
 | `common.hook.frida_maps` | 75 | 85 | a loaded image matches a Frida artifact (`FridaGadget`, `frida-agent`, …) |
 | `ios.hook.method_swizzle` | 75 | 85 | an Objective-C method IMP differs from its baseline/superclass |
 | `ios.hook.mach_region` | 70 | 75 | an anonymous private RWX memory region is present |
@@ -104,7 +105,7 @@ when…" describes the runtime condition that produces the signal.
 | Scenario | Expect fired signals | Expect threat |
 |---|---|---|
 | Jailbroken (palera1n / Dopamine / unc0ver) | ≥1 of `ios.jb.fs_probe`, `ios.jb.dyld_image`, `ios.jb.symlink`, `ios.jb.sysctl_traced` | `PRIVILEGED_ACCESS` (high/critical) |
-| Frida gadget linked / `frida-server` running | ≥1 of `common.hook.frida_maps`, `ios.hook.frida_port`, `ios.hook.mach_region` | `HOOK_FRAMEWORK` |
+| Frida gadget linked / `frida-server` running | ≥1 of `ios.hook.frida_thread`, `common.hook.frida_maps`, `ios.hook.frida_port`, `ios.hook.mach_region` | `HOOK_FRAMEWORK` |
 | Debugger attached (lldb) | ≥1 of `ios.debug.mach_exception`, `ios.debug.sysctl_traced` | `DEBUGGER` |
 | Re-signed / repackaged app | `ios.integrity.sec_code` and/or `ios.integrity.bundle_id` (with anchors configured) | `APP_INTEGRITY` |
 
