@@ -67,6 +67,7 @@ int mobshield_hook_mach_region_inspect(char* evidence, int evidence_len);
 int mobshield_hook_function_prologue_inspect(char* evidence, int evidence_len);
 int mobshield_hook_frida_artifact_scan(char* evidence, int evidence_len);
 int mobshield_hook_frida_thread_scan(char* evidence, int evidence_len);
+int mobshield_hook_frida_symbol_scan(char* evidence, int evidence_len);
 int mobshield_hook_frida_port_probe(char* evidence, int evidence_len);
 int mobshield_hook_dyld_environment_scan(char* evidence, int evidence_len);
 int mobshield_hook_method_swizzle_detect(char* evidence, int evidence_len);

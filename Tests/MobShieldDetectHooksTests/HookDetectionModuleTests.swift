@@ -44,6 +44,20 @@ final class HookDetectionModuleTests: XCTestCase {
         XCTAssertEqual(ThreatType.hookFramework, events.first?.type)
     }
 
+    func testScan_mockFridaSymbols_emitsHighConfidenceSignal() async {
+        MockHookNative.fridaSymbolsDetected = true
+        MockHookNative.fridaSymbolsEvidence = "symbol=gum_init_embedded"
+        defer { MockHookNative.reset() }
+
+        let module = HookDetectionModule(nativeChecker: MockHookNative.self, configureBaselines: {})
+        let signals = await module.scan()
+        XCTAssertEqual(1, signals.count)
+        XCTAssertEqual(HookSignalDefaults.fridaSymbols, signals[0].name)
+        XCTAssertEqual(90, signals[0].confidence)
+        let events = SignalAggregator(config: MobShieldConfig()).aggregate(signals: signals)
+        XCTAssertEqual(ThreatType.hookFramework, events.first?.type)
+    }
+
     func testScan_noHits_returnsEmpty() async {
         MockHookNative.reset()
         let module = HookDetectionModule(nativeChecker: MockHookNative.self, configureBaselines: {})
@@ -68,6 +82,7 @@ enum MockHookNative: HookNativeChecking {
     static var prologueDetected = false
     static var fridaMapsDetected = false
     static var fridaThreadDetected = false
+    static var fridaSymbolsDetected = false
     static var fridaPortDetected = false
     static var dyldDetected = false
     static var swizzleDetected = false
@@ -75,6 +90,7 @@ enum MockHookNative: HookNativeChecking {
     static var prologueEvidence = ""
     static var fridaMapsEvidence = ""
     static var fridaThreadEvidence = ""
+    static var fridaSymbolsEvidence = ""
     static var fridaPortEvidence = ""
     static var dyldEvidence = ""
     static var swizzleEvidence = ""
@@ -84,6 +100,7 @@ enum MockHookNative: HookNativeChecking {
         prologueDetected = false
         fridaMapsDetected = false
         fridaThreadDetected = false
+        fridaSymbolsDetected = false
         fridaPortDetected = false
         dyldDetected = false
         swizzleDetected = false
@@ -91,6 +108,7 @@ enum MockHookNative: HookNativeChecking {
         prologueEvidence = ""
         fridaMapsEvidence = ""
         fridaThreadEvidence = ""
+        fridaSymbolsEvidence = ""
         fridaPortEvidence = ""
         dyldEvidence = ""
         swizzleEvidence = ""
@@ -115,6 +133,10 @@ enum MockHookNative: HookNativeChecking {
 
     static func fridaThreadScan() -> HookNativeCheckResult {
         result(detected: fridaThreadDetected, evidence: fridaThreadEvidence)
+    }
+
+    static func fridaSymbolScan() -> HookNativeCheckResult {
+        result(detected: fridaSymbolsDetected, evidence: fridaSymbolsEvidence)
     }
 
     static func fridaPortProbe() -> HookNativeCheckResult {

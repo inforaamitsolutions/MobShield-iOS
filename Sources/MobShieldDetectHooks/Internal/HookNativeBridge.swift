@@ -36,6 +36,7 @@ public protocol HookNativeChecking: Sendable {
     static func functionPrologueInspect() -> HookNativeCheckResult
     static func fridaArtifactScan() -> HookNativeCheckResult
     static func fridaThreadScan() -> HookNativeCheckResult
+    static func fridaSymbolScan() -> HookNativeCheckResult
     static func fridaPortProbe() -> HookNativeCheckResult
     static func dyldEnvironmentScan() -> HookNativeCheckResult
     static func methodSwizzleDetect() -> HookNativeCheckResult
@@ -70,6 +71,10 @@ public enum HookNativeBridge: HookNativeChecking {
 
     public static func fridaThreadScan() -> HookNativeCheckResult {
         runCheck(codeFn: mobshield_hook_frida_thread_scan)
+    }
+
+    public static func fridaSymbolScan() -> HookNativeCheckResult {
+        runCheck(codeFn: mobshield_hook_frida_symbol_scan)
     }
 
     public static func fridaPortProbe() -> HookNativeCheckResult {
@@ -207,6 +212,9 @@ private func mobshield_hook_frida_artifact_scan(_ evidence: UnsafeMutablePointer
 
 @_silgen_name("mobshield_hook_frida_thread_scan")
 private func mobshield_hook_frida_thread_scan(_ evidence: UnsafeMutablePointer<CChar>?, _ evidence_len: Int32) -> Int32
+
+@_silgen_name("mobshield_hook_frida_symbol_scan")
+private func mobshield_hook_frida_symbol_scan(_ evidence: UnsafeMutablePointer<CChar>?, _ evidence_len: Int32) -> Int32
 
 @_silgen_name("mobshield_hook_frida_port_probe")
 private func mobshield_hook_frida_port_probe(_ evidence: UnsafeMutablePointer<CChar>?, _ evidence_len: Int32) -> Int32

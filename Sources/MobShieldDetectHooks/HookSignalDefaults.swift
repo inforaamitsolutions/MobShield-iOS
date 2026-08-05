@@ -21,6 +21,7 @@ public enum HookSignalDefaults {
     public static let prologue = "common.hook.prologue"
     public static let fridaMaps = "common.hook.frida_maps"
     public static let fridaThread = "ios.hook.frida_thread"
+    public static let fridaSymbols = "ios.hook.frida_symbols"
     public static let fridaPort = "ios.hook.frida_port"
     public static let dyldInsert = "ios.hook.dyld_insert"
     public static let methodSwizzle = "ios.hook.method_swizzle"
@@ -31,6 +32,8 @@ public enum HookSignalDefaults {
         fridaMaps: SignalTuning(weight: 75, confidence: 85),
         // Frida worker-thread names survive dylib renaming, so this is a high-confidence artifact.
         fridaThread: SignalTuning(weight: 80, confidence: 90),
+        // Exported Gum/Frida symbols likewise survive renaming; a legit app rarely exports them.
+        fridaSymbols: SignalTuning(weight: 80, confidence: 90),
         fridaPort: SignalTuning(weight: 30, confidence: 50),
         dyldInsert: SignalTuning(weight: 65, confidence: 70),
         methodSwizzle: SignalTuning(weight: 75, confidence: 85),
