@@ -37,7 +37,7 @@ public struct MobShieldState: Equatable, Sendable {
     }
 }
 
-public enum RiskLevel: String, Sendable {
+public enum RiskLevel: String, Sendable, Codable {
     case none = "NONE"
     case low = "LOW"
     case medium = "MEDIUM"

@@ -15,7 +15,7 @@
  */
 
 /// Normalized threat category aligned with MOBSHIELD_SPEC section C.2.
-public enum ThreatType: String, CaseIterable, Sendable {
+public enum ThreatType: String, CaseIterable, Sendable, Codable {
     case privilegedAccess = "PRIVILEGED_ACCESS"
     case hookFramework = "HOOK_FRAMEWORK"
     case debugger = "DEBUGGER"
