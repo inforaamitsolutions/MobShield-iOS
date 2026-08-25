@@ -164,5 +164,9 @@ let package = Package(
             name: "MobShieldDetectDebuggerTests",
             dependencies: ["MobShieldDetectDebugger", "MobShieldCore"]
         ),
+        .testTarget(
+            name: "MobShieldDetectEnvironmentTests",
+            dependencies: ["MobShieldDetectEnvironment", "MobShieldCore"]
+        ),
     ]
 )
