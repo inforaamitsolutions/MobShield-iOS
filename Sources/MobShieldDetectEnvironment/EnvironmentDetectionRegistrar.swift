@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import Foundation
+import MobShieldCore
 
-/// Placeholder for MobShieldDetectEnvironment. Detection logic not implemented in skeleton.
-public enum MobShieldDetectEnvironmentPlaceholder {
-    public static let moduleName: String = "MobShieldDetectEnvironment"
+public enum EnvironmentDetectionRegistrar {
+    public static func register(config: MobShieldConfig = MobShieldConfig()) async {
+        await ModuleRegistry.shared.register(EnvironmentDetectionModule(config: config))
+    }
 }

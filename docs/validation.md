@@ -72,6 +72,13 @@ when…" describes the runtime condition that produces the signal.
 | `ios.debug.timing` | 55 | 65 | a timing loop runs anomalously slow (single-stepping) |
 | `ios.debug.deny_attach` | 50 | 60 | `ptrace(PT_DENY_ATTACH)` reports an attached tracer (opt-in) |
 
+### Environment — module `environment`, threats `EMULATOR` / `AUTOMATION`
+
+| Signal | weight | conf | Signal fires when… |
+|---|---|---|---|
+| `ios.env.simulator` | 90 | 95 | running under the iOS Simulator (compile target or `SIMULATOR_*` env vars) |
+| `ios.automation.frameworks` | 75 | 85 | UI/test automation is present (`XCInjectBundleInto`, injected `WebDriverAgent`/`libXCTest`, or `XCUIApplication`/`FBApplication` loaded) |
+
 ### Integrity — module `integrity`, threat `APP_INTEGRITY`
 
 | Signal | weight | conf | Signal fires when… |
@@ -100,6 +107,9 @@ when…" describes the runtime condition that produces the signal.
   checks (`expectedSigners`, etc.) for production.
 - **Situational:** `ios.debug.*` will fire whenever a debugger is attached (e.g. launching from
   Xcode). Validate the clean debugger baseline from a build launched **without** the debugger.
+- **Simulator caveat:** with the `environment` module registered, `ios.env.simulator` fires (→
+  `EMULATOR`) whenever the app runs in the Simulator — by design. The clean *device* baseline must
+  therefore be validated on real hardware, where this signal is silent.
 
 ### Compromised environment (expected positive detections)
 
@@ -109,6 +119,8 @@ when…" describes the runtime condition that produces the signal.
 | Frida gadget linked / `frida-server` running | ≥1 of `ios.hook.frida_thread`, `ios.hook.frida_symbols`, `common.hook.frida_maps`, `ios.hook.frida_port`, `ios.hook.mach_region` | `HOOK_FRAMEWORK` |
 | Debugger attached (lldb) | ≥1 of `ios.debug.mach_exception`, `ios.debug.sysctl_traced` | `DEBUGGER` |
 | Re-signed / repackaged app | `ios.integrity.sec_code` and/or `ios.integrity.bundle_id` (with anchors configured) | `APP_INTEGRITY` |
+| Running in the iOS Simulator | `ios.env.simulator` | `EMULATOR` |
+| UI automation (Appium / WebDriverAgent / XCUITest) | `ios.automation.frameworks` | `AUTOMATION` |
 
 ## Status
 
