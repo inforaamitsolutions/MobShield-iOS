@@ -85,14 +85,25 @@ final class MobShieldEngineIntegrationTests: XCTestCase {
 
         engine.start()
         try? await Task.sleep(nanoseconds: 250_000_000)
+        XCTAssertGreaterThanOrEqual(
+            listener.finishedCount,
+            2,
+            "periodic interval should trigger repeated scan waves"
+        )
+
         engine.stop()
+        // A wave already in flight when stop() is called completes (cancellation is cooperative and
+        // runScanWave does not abort mid-wave), so let it settle before snapshotting the count.
+        try? await Task.sleep(nanoseconds: 120_000_000)
+        let wavesAfterStop = listener.finishedCount
 
-        let wavesAtStop = listener.finishedCount
-        XCTAssertGreaterThanOrEqual(wavesAtStop, 2, "periodic interval should trigger repeated scan waves")
-
-        // No further waves should fire once stopped.
-        try? await Task.sleep(nanoseconds: 150_000_000)
-        XCTAssertEqual(wavesAtStop, listener.finishedCount, "stop() must halt the periodic loop")
+        // Once stopped and settled, no new wave may start.
+        try? await Task.sleep(nanoseconds: 200_000_000)
+        XCTAssertEqual(
+            wavesAfterStop,
+            listener.finishedCount,
+            "stop() must halt the periodic loop"
+        )
     }
 
     // MARK: - Termination policy
