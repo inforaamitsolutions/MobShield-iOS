@@ -86,6 +86,7 @@ let package = Package(
                 "mach_region_inspect.c",
                 "frida_artifact_scan.c",
                 "frida_thread_scan.c",
+                "frida_symbol_scan.c",
                 "frida_port_probe.c",
                 "dyld_environment_scan.c",
                 "hook_baseline_store.c",
