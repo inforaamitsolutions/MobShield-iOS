@@ -15,7 +15,7 @@
  */
 
 /// Aggregated risk level for a ``ThreatEvent``.
-public enum Severity: String, Sendable, Comparable {
+public enum Severity: String, Sendable, Comparable, Codable {
     case info = "INFO"
     case low = "LOW"
     case medium = "MEDIUM"
