@@ -32,7 +32,7 @@ MobShield runs a set of detection modules, aggregates their weighted signals int
 ```swift
 // Package.swift
 dependencies: [
-    .package(url: "https://github.com/inforaamitsolutions/MobShield-iOS", from: "1.0.3"),
+    .package(url: "https://github.com/inforaamitsolutions/MobShield-iOS", from: "1.1.0"),
 ]
 ```
 
@@ -50,7 +50,7 @@ dependencies: [
 ### CocoaPods
 
 ```ruby
-pod 'MobShield/All', '1.0.3'
+pod 'MobShield/All', '1.1.0'
 ```
 
 Add `scripts/mobshield-personalize.sh` as a Run Script build phase (see `MobShieldSampleApp`).
@@ -129,7 +129,7 @@ swift test
 
 ## Release
 
-Tag `*.*.*` (e.g. `1.0.3`) on this repo for SwiftPM; optionally build XCFramework zips for GitHub Releases and run `pod trunk push` for CocoaPods.
+Tag `*.*.*` (e.g. `1.1.0`) on this repo for SwiftPM; optionally build XCFramework zips for GitHub Releases and run `pod trunk push` for CocoaPods.
 
 ```bash
 ./scripts/build-xcframeworks.sh
