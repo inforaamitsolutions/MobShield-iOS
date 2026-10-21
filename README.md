@@ -19,6 +19,43 @@ MobShield runs a set of detection modules, aggregates their weighted signals int
 | `MobShieldDetectEnvironment` | Simulator, automation |
 | `MobShieldDetectIntegrity` | SecCode, build anchor |
 
+## Why MobShield
+
+- **Fully auditable.** The detection logic is open source under Apache-2.0, so you can review it, fork it, and audit it.
+- **No telemetry.** MobShield makes no network calls. Threat events go only to your listener and, if you choose, your backend.
+- **Modular.** Add only the products you need.
+- **Safe to roll out.** It's detect-only by default and never kills your process unless you opt in.
+- **Harder to bypass generically.** A personalization build phase makes each build unique, so one off-the-shelf bypass script doesn't fit every app.
+- **Server-verifiable.** Signed posture reports let your backend decide whether to trust a session.
+
+MobShield raises the cost of an attack. Like any client-side protection, it can't make an app unbreakable, so pair it with server-side checks.
+
+## How it compares
+
+| | MobShield | [freeRASP](https://github.com/talsec/Free-RASP-iOS) | [IOSSecuritySuite](https://github.com/securing/IOSSecuritySuite) |
+|---|---|---|---|
+| License | Apache-2.0 (Swift); native core BSL | MIT wrapper + proprietary binary core, fair-usage policy | Proprietary EULA: free for companies with ≤100 employees, paid plans above |
+| Detection logic auditable | ✅ | ❌ (closed binary) | ✅ |
+| Sends data to a vendor | ❌ No network calls | Incident data feeds Talsec's weekly Security Report | ❌ |
+| Jailbreak (Dopamine, palera1n, rootless) | ✅ | ✅ | ✅ |
+| Hooking (Frida, Substrate, ElleKit) | ✅ | ✅ | ✅ (runtime/MSHook detection marked experimental) |
+| Debugger | ✅ | ✅ | ✅ |
+| Simulator / automation | ✅ | ✅ | ✅ (simulator) |
+| Code-signing / tamper integrity | ✅ | ✅ | ✅ |
+| Backend-verifiable report | ✅ Signed report, your own key | AppiCrypt (commercial plan) | ❌ |
+| Per-build personalization | ✅ | ❌ | ❌ |
+| Platforms | iOS + [Android](https://github.com/inforaamitsolutions/MobShield-Android) | iOS, Android, Flutter, RN, Cordova, Capacitor | iOS |
+
+IOSSecuritySuite also offers proxy/VPN and Lockdown Mode detection plus active "deny" APIs, and freeRASP is ahead on cross-platform framework support. If you need those today, they're good choices. *Comparison based on each project's public README and license as of October 2026. Corrections are welcome via PR.*
+
+## OWASP MASVS mapping
+
+| MASVS v2 control | MobShield product |
+|---|---|
+| MASVS-RESILIENCE-1: platform integrity | `MobShieldDetectJailbreak`, `MobShieldDetectEnvironment` |
+| MASVS-RESILIENCE-2: anti-tampering | `MobShieldDetectIntegrity` |
+| MASVS-RESILIENCE-4: anti-dynamic analysis | `MobShieldDetectHooks`, `MobShieldDetectDebugger`, `MobShieldDetectEnvironment` |
+
 ## Requirements
 
 - Xcode 15+
@@ -43,6 +80,7 @@ dependencies: [
     .product(name: "MobShieldDetectJailbreak", package: "MobShield"),
     .product(name: "MobShieldDetectHooks", package: "MobShield"),
     .product(name: "MobShieldDetectDebugger", package: "MobShield"),
+    .product(name: "MobShieldDetectEnvironment", package: "MobShield"),
     .product(name: "MobShieldDetectIntegrity", package: "MobShield"),
 ])
 ```
@@ -64,6 +102,7 @@ import MobShieldCore
 import MobShieldDetectJailbreak
 import MobShieldDetectHooks
 import MobShieldDetectDebugger
+import MobShieldDetectEnvironment
 import MobShieldDetectIntegrity
 
 final class MyListener: MobShieldListener {
@@ -83,6 +122,7 @@ Task {
     await JailbreakDetectionRegistrar.register(config: config)
     await HookDetectionRegistrar.register(config: config)
     await DebuggerDetectionRegistrar.register(config: config)
+    await EnvironmentDetectionRegistrar.register(config: config)
     await IntegrityDetectionRegistrar.register(config: config)
     MobShield.shared.start(config: config, listener: listener)
 }
